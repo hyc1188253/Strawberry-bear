@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>草莓熊 - 逆境清醒</title>
+    <title>草莓熊 - 逆境清醒 (Python turtle 逐行翻译版)</title>
     <style>
         * {
             margin: 0;
@@ -11,275 +11,913 @@
             box-sizing: border-box;
         }
         body {
-            background: #f5f0eb;
+            background: #f0f0f0;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: "黑体", "Microsoft YaHei", sans-serif;
             padding: 20px;
-        }
-        .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            padding: 20px;
-            display: inline-block;
         }
         canvas {
             display: block;
             margin: 0 auto;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            background: white;
         }
-        .title {
+        .info {
             text-align: center;
             margin-top: 15px;
-            font-size: 14px;
-            color: #cb3263;
-        }
-        .note {
-            text-align: center;
-            margin-top: 10px;
+            font-family: "黑体", sans-serif;
+            color: #666;
             font-size: 12px;
-            color: #999;
         }
     </style>
 </head>
 <body>
 <div>
-    <div class="container">
-        <canvas id="bearCanvas" width="700" height="700" style="width:700px;height:700px;"></canvas>
-        <div class="title">🍓 逆境清醒草莓熊 🧸</div>
-        <div class="note">愿你每天都没有烦恼</div>
-    </div>
+    <canvas id="strawberryCanvas" width="850" height="760" style="width:850px;height:760px;"></canvas>
+    <div class="info">🐻 逆境清醒草莓熊 | 原 Python turtle 代码逐行翻译为 Canvas</div>
 </div>
 
 <script>
     (function(){
-        const canvas = document.getElementById('bearCanvas');
+        const canvas = document.getElementById('strawberryCanvas');
         const ctx = canvas.getContext('2d');
-
-        canvas.width = 700;
-        canvas.height = 700;
-
-        ctx.clearRect(0, 0, 700, 700);
         
-        function fillCircle(x, y, r, fillColor, strokeColor = '#321320', lineWidth = 2) {
+        canvas.width = 850;
+        canvas.height = 760;
+        
+        // 清空画布为白色背景
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // ========== Turtle 模拟器 ==========
+        // 维护当前状态
+        let currentX = 0, currentY = 0;
+        let currentHeading = 0; // 0=向右, 90=向上, 等等
+        let penDown = true;
+        let currentPenSize = 1;
+        let currentPenColor = "#000000";
+        let currentFillColor = "#000000";
+        let isFilling = false;
+        let fillPath = []; // 存储填充路径的点
+        
+        // 开始新路径
+        function beginPath() {
+            if (isFilling) {
+                fillPath = [];
+            }
             ctx.beginPath();
-            ctx.arc(x, y, r, 0, Math.PI*2);
-            ctx.fillStyle = fillColor;
+            ctx.moveTo(currentX, currentY);
+        }
+        
+        function moveTo(x, y) {
+            currentX = x;
+            currentY = y;
+            ctx.moveTo(x, y);
+        }
+        
+        function lineTo(x, y) {
+            currentX = x;
+            currentY = y;
+            ctx.lineTo(x, y);
+        }
+        
+        // 前进
+        function fd(distance) {
+            const rad = currentHeading * Math.PI / 180;
+            const newX = currentX + distance * Math.cos(rad);
+            const newY = currentY + distance * Math.sin(rad);
+            if (penDown) {
+                ctx.lineTo(newX, newY);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(newX, newY);
+            } else {
+                ctx.beginPath();
+                ctx.moveTo(newX, newY);
+            }
+            currentX = newX;
+            currentY = newY;
+        }
+        
+        // 后退
+        function bk(distance) {
+            fd(-distance);
+        }
+        
+        // 左转/右转
+        function lt(angle) {
+            currentHeading += angle;
+        }
+        
+        function rt(angle) {
+            currentHeading -= angle;
+        }
+        
+        // 设置朝向
+        function seth(angle) {
+            currentHeading = angle;
+        }
+        
+        // 画笔属性
+        function pensize(size) {
+            currentPenSize = size;
+            ctx.lineWidth = size;
+        }
+        
+        function pencolor(color) {
+            currentPenColor = color;
+            ctx.strokeStyle = color;
+        }
+        
+        function fillcolor(color) {
+            currentFillColor = color;
+            ctx.fillStyle = color;
+        }
+        
+        function color(strokeColor, fillColor) {
+            pencolor(strokeColor);
+            fillcolor(fillColor);
+        }
+        
+        // 开始填充
+        function begin_fill() {
+            isFilling = true;
+            fillPath = [{x: currentX, y: currentY}];
+            ctx.beginPath();
+            ctx.moveTo(currentX, currentY);
+        }
+        
+        // 结束填充
+        function end_fill() {
+            if (fillPath.length > 0) {
+                ctx.closePath();
+                ctx.fillStyle = currentFillColor;
+                ctx.fill();
+                ctx.strokeStyle = currentPenColor;
+                ctx.lineWidth = currentPenSize;
+                ctx.stroke();
+            }
+            isFilling = false;
+            fillPath = [];
+            ctx.beginPath();
+            ctx.moveTo(currentX, currentY);
+        }
+        
+        // 画圆/弧线 (模拟 turtle 的 circle)
+        // radius: 半径，正数为向左画，负数为向右画
+        // extent: 角度，默认360
+        function circle(radius, extent = 360) {
+            // 计算圆心位置
+            const centerX = currentX;
+            const centerY = currentY - radius;
+            // turtle 的 circle 起始方向是朝向当前朝向的左侧/右侧
+            // 起始角度: 如果 radius > 0, 从 -90 度方向开始 (向上)
+            // 这里简化处理，直接使用 arc
+            const startAngle = -90 * Math.PI / 180;
+            const endAngle = startAngle + (extent * Math.PI / 180);
+            const anticlockwise = radius < 0;
+            const absRadius = Math.abs(radius);
+            
+            ctx.arc(centerX, centerY, absRadius, startAngle, endAngle, anticlockwise);
+            
+            // 更新位置到弧线终点
+            const endRad = startAngle + (extent * Math.PI / 180);
+            currentX = centerX + absRadius * Math.cos(endRad);
+            currentY = centerY + absRadius * Math.sin(endRad);
+            ctx.lineTo(currentX, currentY);
+        }
+        
+        // penup/pendown
+        function penup() {
+            penDown = false;
+            ctx.beginPath();
+        }
+        
+        function pendown() {
+            penDown = true;
+            ctx.beginPath();
+            ctx.moveTo(currentX, currentY);
+        }
+        
+        // goto 函数
+        function goto(x, y) {
+            if (penDown) {
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+            } else {
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+            }
+            currentX = x;
+            currentY = y;
+        }
+        
+        // 设置点 (dot)
+        function dot(color, size = null) {
+            const oldFill = ctx.fillStyle;
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(currentX, currentY, size || currentPenSize/2, 0, Math.PI*2);
             ctx.fill();
-            ctx.strokeStyle = strokeColor;
-            ctx.lineWidth = lineWidth;
+            ctx.fillStyle = oldFill;
+            ctx.beginPath();
+            ctx.moveTo(currentX, currentY);
+        }
+        
+        // ========== 开始逐行翻译原代码 ==========
+        
+        // 原代码开头的设置
+        // t.colormode(255) - canvas 不需要
+        // t.speed(0) - 不需要
+        // t.screensize(850, 760, "white") - 已设置
+        // t.setup(width=850, height=760) - 已设置 canvas 尺寸
+        // t.title("逆境清醒草莓熊！") - 已设置页面标题
+        // t.resizemode('noresize') - canvas 默认
+        // t.tracer(1) - 不需要
+        
+        // 定义 mlingpen 函数
+        function mlingpen(x, y) {
+            penup();
+            goto(x, y);
+            pendown();
+        }
+        
+        // 定义 rose 函数 - 逐行翻译
+        function rose() {
+            seth(90);
+            mlingpen(-225, -60);
+            pensize(10);
+            pencolor("#035025");
+            // t.circle(300, 30)
+            // 画半径300，角度30的弧线
+            ctx.beginPath();
+            // 简化: 直接画弧线
+            ctx.arc(-225, -60 + 300, 300, -Math.PI/2, (-Math.PI/2)+(30*Math.PI/180));
             ctx.stroke();
+            currentX = -225 + 300 * Math.cos((-Math.PI/2)+(30*Math.PI/180));
+            currentY = -60 + 300 + 300 * Math.sin((-Math.PI/2)+(30*Math.PI/180));
+            
+            mlingpen(-240, 70);
+            pensize(2);
+            color("#000000", "#22ac38");
+            seth(12);
+            mlingpen(-235, 40);
+            lt(40);
+            fd(50);
+            begin_fill();
+            circle(-150, 30);
+            circle(-2, 140);
+            circle(-150, 43);
+            penup();
+            end_fill();
+            
+            mlingpen(-235, 40);
+            lt(330);
+            fd(50);
+            begin_fill();
+            circle(-150, 30);
+            circle(-2, 140);
+            circle(-150, 43);
+            penup();
+            end_fill();
+            
+            mlingpen(-235, 40);
+            lt(260);
+            fd(50);
+            begin_fill();
+            circle(-150, 30);
+            circle(-2, 140);
+            circle(-150, 43);
+            penup();
+            end_fill();
+            
+            pensize(2);
+            seth(12);
+            mlingpen(-210, 60);
+            begin_fill();
+            color("#000000", "#f8c0c8");
+            circle(50, 150);
+            rt(20);
+            fd(40);
+            rt(40);
+            circle(15, 130);
+            fd(50);
+            circle(15, 80);
+            penup();
+            end_fill();
+            
+            pensize(2);
+            seth(12);
+            mlingpen(-210, 65);
+            begin_fill();
+            color("#f5aab5", "#f5aab5");
+            circle(34, 150);
+            rt(20);
+            fd(30);
+            rt(40);
+            circle(10, 130);
+            fd(50);
+            circle(15, 80);
+            penup();
+            end_fill();
+            
+            pensize(2);
+            seth(12);
+            mlingpen(-210, 65);
+            begin_fill();
+            color("#f198a5", "#f198a5");
+            circle(30, 150);
+            rt(20);
+            fd(30);
+            rt(40);
+            circle(10, 130);
+            fd(50);
+            circle(15, 80);
+            penup();
+            end_fill();
+            
+            pensize(2);
+            seth(12);
+            mlingpen(-210, 65);
+            begin_fill();
+            color("#ee8998", "#ee8998");
+            circle(20, 150);
+            rt(20);
+            fd(30);
+            rt(40);
+            circle(10, 130);
+            fd(50);
+            circle(15, 80);
+            penup();
+            end_fill();
+            
+            mlingpen(-220, 80);
+            begin_fill();
+            color("#e56e7f", "#e56e7f");
+            circle(15, 200);
+            rt(20);
+            fd(30);
+            rt(40);
+            circle(10, 130);
+            fd(50);
+            circle(15, 80);
+            penup();
+            end_fill();
+            
+            seth(35);
+            mlingpen(-230, 90);
+            begin_fill();
+            color("#000000", "#fda7b5");
+            circle(50, 50);
+            rt(40);
+            circle(25, 200);
+            penup();
+            end_fill();
+            
+            seth(130);
+            mlingpen(-294.51, 142.14);
+            begin_fill();
+            color("#000000", "#fdadb8");
+            circle(20, 100);
+            rt(90);
+            circle(10, 180);
+            rt(90);
+            circle(15, 130);
+            rt(110);
+            circle(30, 130);
+            rt(50);
+            circle(50, 80);
+            penup();
+            end_fill();
+            
+            seth(80);
+            mlingpen(-240, 140);
+            begin_fill();
+            color("#000000", "#fe8e9e");
+            circle(10, 100);
+            rt(90);
+            circle(12, 150);
+            rt(90);
+            circle(15, 130);
+            rt(50);
+            circle(50, 80);
+            rt(10);
+            circle(50, 80);
+            goto(-240, 140);
+            penup();
+            end_fill();
+            
+            seth(80);
+            mlingpen(-250, 140);
+            begin_fill();
+            color("#f9788b", "#f9788b");
+            circle(5, 130);
+            rt(90);
+            circle(10, 170);
+            rt(100);
+            circle(10, 130);
+            rt(70);
+            circle(40, 80);
+            rt(40);
+            circle(30, 30);
+            goto(-250, 140);
+            penup();
+            end_fill();
+            
+            seth(10);
+            mlingpen(-245, 80);
+            begin_fill();
+            color("#000000", "#ef5f7a");
+            seth(35);
+            circle(30, 80);
+            rt(80);
+            circle(10, 150);
+            rt(80);
+            circle(17, 200);
+            rt(60);
+            circle(29, 120);
+            goto(-245, 80);
+            penup();
+            end_fill();
+            
+            seth(10);
+            mlingpen(-250, 85);
+            begin_fill();
+            color("#ef758c", "#ef758c");
+            seth(35);
+            circle(25, 80);
+            rt(80);
+            circle(6, 150);
+            rt(80);
+            circle(12, 210);
+            rt(60);
+            circle(23, 120);
+            goto(-250, 85);
+            penup();
+            end_fill();
+            
+            seth(0);
+            mlingpen(-250, 125);
+            pensize(5);
+            dot("#ff4969");
+            pensize(2);
+            mlingpen(-266.97, 121.26);
+            pencolor("#321320");
+            fillcolor("#f04969");
+            begin_fill();
+            rt(80);
+            circle(12, 150);
+            rt(80);
+            circle(6, 270);
+            rt(150);
+            circle(10, 180);
+            penup();
+            end_fill();
+            
+            seth(-70);
+            mlingpen(-210, 100);
+            begin_fill();
+            color("#000000", "#f04969");
+            rt(20);
+            fd(30);
+            circle(-40, 170);
+            lt(20);
+            fd(20);
+            goto(-210, 100);
+            penup();
+            end_fill();
+            
+            seth(-70);
+            mlingpen(-215, 90);
+            begin_fill();
+            color("#ee627d", "#ee627d");
+            rt(20);
+            fd(20);
+            circle(-35, 170);
+            lt(20);
+            fd(15);
+            goto(-220, 90);
+            penup();
+            end_fill();
+            
+            seth(-70);
+            mlingpen(-220, 80);
+            begin_fill();
+            color("#f47a91", "#f47a91");
+            rt(20);
+            fd(10);
+            circle(-28, 170);
+            lt(20);
+            fd(10);
+            goto(-220, 90);
+            penup();
+            end_fill();
+            
+            seth(150);
+            mlingpen(-220, 100);
+            begin_fill();
+            color("#000000", "#f7cad1");
+            circle(20, 80);
+            rt(10);
+            circle(-40, 70);
+            rt(10);
+            circle(20, 80);
+            rt(5);
+            circle(5, 180);
+            rt(80);
+            circle(20, 70);
+            rt(80);
+            circle(40, 60);
+            rt(10);
+            circle(40, 110);
+            goto(-220, 100);
+            penup();
+            end_fill();
+            
+            seth(150);
+            mlingpen(-220, 98);
+            begin_fill();
+            color("#ffe9f2", "#ffe9f2");
+            circle(15, 80);
+            rt(7);
+            circle(-45, 75);
+            rt(8);
+            circle(20, 50);
+            rt(5);
+            circle(2, 200);
+            rt(80);
+            circle(15, 85);
+            rt(80);
+            circle(40, 60);
+            rt(20);
+            circle(30, 70);
+            goto(-220, 98);
+            penup();
+            end_fill();
+            
+            seth(150);
+            mlingpen(-180, 55);
+            begin_fill();
+            color("#000000", "#f7cad1");
+            circle(30, 80);
+            rt(10);
+            circle(-60, 70);
+            rt(5);
+            circle(30, 80);
+            rt(5);
+            circle(5, 180);
+            rt(90);
+            circle(30, 80);
+            rt(80);
+            circle(40, 70);
+            circle(20, 50);
+            rt(90);
+            circle(20, 95);
+            goto(-180, 55);
+            penup();
+            end_fill();
+            
+            seth(150);
+            mlingpen(-190, 50);
+            begin_fill();
+            color("#f7e0e3", "#f7e0e3");
+            circle(25, 80);
+            rt(8);
+            circle(-55, 75);
+            rt(3);
+            circle(25, 60);
+            rt(6);
+            circle(5, 200);
+            rt(90);
+            circle(30, 80);
+            rt(80);
+            circle(22, 80);
+            circle(20, 40);
+            rt(80);
+            circle(15, 90);
+            goto(-190, 50);
+            penup();
+            end_fill();
         }
         
-        // 身体
-        ctx.beginPath();
-        ctx.moveTo(120, 110);
-        ctx.lineTo(200, 0);
-        ctx.lineTo(240, -40);
-        ctx.quadraticCurveTo(280, -70, 300, -20);
-        ctx.lineTo(380, 80);
-        ctx.quadraticCurveTo(420, 130, 400, 200);
-        ctx.lineTo(360, 280);
-        ctx.quadraticCurveTo(320, 350, 260, 370);
-        ctx.lineTo(180, 380);
-        ctx.quadraticCurveTo(100, 370, 60, 310);
-        ctx.lineTo(20, 240);
-        ctx.quadraticCurveTo(-10, 180, 20, 130);
-        ctx.lineTo(80, 100);
-        ctx.lineTo(120, 110);
-        ctx.fillStyle = '#cb3263';
-        ctx.fill();
-        ctx.strokeStyle = '#321320';
-        ctx.lineWidth = 4;
-        ctx.stroke();
+        // 定义 mling_draw_eyeball 函数
+        const mling_circle_list = [
+            [18, 360], [14, 360], [10, 360], [6, 360],
+            [18, 360], [14, 360], [10, 360], [6, 360]
+        ];
+        let circleIndex = 0;
         
-        // 白色面部
-        ctx.beginPath();
-        ctx.ellipse(200, 180, 130, 120, 0, 0, Math.PI*2);
-        ctx.fillStyle = '#ffffff';
-        ctx.fill();
-        ctx.strokeStyle = '#321320';
-        ctx.lineWidth = 4;
-        ctx.stroke();
-        
-        // 左耳
-        ctx.beginPath();
-        ctx.ellipse(70, 100, 45, 50, -0.3, 0, Math.PI*2);
-        ctx.fillStyle = '#cb3263';
-        ctx.fill();
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.ellipse(70, 100, 28, 32, -0.3, 0, Math.PI*2);
-        ctx.fillStyle = '#f3d2ad';
-        ctx.fill();
-        ctx.stroke();
-        
-        // 右耳
-        ctx.beginPath();
-        ctx.ellipse(330, 100, 45, 50, 0.3, 0, Math.PI*2);
-        ctx.fillStyle = '#cb3263';
-        ctx.fill();
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.ellipse(330, 100, 28, 32, 0.3, 0, Math.PI*2);
-        ctx.fillStyle = '#f3d2ad';
-        ctx.fill();
-        ctx.stroke();
-        
-        // 眼睛
-        fillCircle(145, 160, 22, '#ffffff', '#321320', 3);
-        fillCircle(255, 160, 22, '#ffffff', '#321320', 3);
-        fillCircle(150, 162, 12, '#482d08', '#321320', 2);
-        fillCircle(250, 162, 12, '#482d08', '#321320', 2);
-        fillCircle(152, 162, 7, '#000000');
-        fillCircle(248, 162, 7, '#000000');
-        fillCircle(157, 157, 3, '#ffffff');
-        fillCircle(243, 157, 3, '#ffffff');
-        
-        // 鼻子
-        ctx.beginPath();
-        ctx.moveTo(195, 210);
-        ctx.lineTo(205, 230);
-        ctx.lineTo(185, 230);
-        ctx.closePath();
-        ctx.fillStyle = '#f04969';
-        ctx.fill();
-        ctx.strokeStyle = '#321320';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        fillCircle(195, 215, 4, '#ffffff');
-        
-        // 嘴巴
-        ctx.beginPath();
-        ctx.arc(200, 245, 28, 0.05, Math.PI - 0.05);
-        ctx.strokeStyle = '#321320';
-        ctx.lineWidth = 3;
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(200, 258, 12, 0, Math.PI);
-        ctx.stroke();
-        
-        // 眉毛
-        ctx.beginPath();
-        ctx.moveTo(125, 135);
-        ctx.lineTo(155, 140);
-        ctx.lineWidth = 6;
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(245, 140);
-        ctx.lineTo(275, 135);
-        ctx.stroke();
-        
-        // 腮红
-        fillCircle(115, 210, 12, '#f8c0c8', 'transparent', 0);
-        fillCircle(285, 210, 12, '#f8c0c8', 'transparent', 0);
-        
-        // 绿叶
-        ctx.beginPath();
-        ctx.moveTo(200, 65);
-        ctx.lineTo(185, 80);
-        ctx.lineTo(200, 92);
-        ctx.lineTo(215, 80);
-        ctx.fillStyle = '#035025';
-        ctx.fill();
-        ctx.fillStyle = '#22ac38';
-        ctx.beginPath();
-        ctx.ellipse(200, 68, 12, 8, 0, 0, Math.PI*2);
-        ctx.fill();
-        
-        // 围兜
-        ctx.beginPath();
-        ctx.ellipse(200, 320, 70, 40, 0, 0, Math.PI*2);
-        ctx.fillStyle = '#fef7e6';
-        ctx.fill();
-        ctx.strokeStyle = '#cb9e7c';
-        ctx.stroke();
-        
-        // 手臂
-        ctx.beginPath();
-        ctx.moveTo(85, 210);
-        ctx.quadraticCurveTo(45, 240, 50, 290);
-        ctx.lineTo(70, 285);
-        ctx.quadraticCurveTo(72, 250, 100, 245);
-        ctx.fillStyle = '#cb3263';
-        ctx.fill();
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(315, 210);
-        ctx.quadraticCurveTo(355, 240, 350, 290);
-        ctx.lineTo(330, 285);
-        ctx.quadraticCurveTo(328, 245, 300, 245);
-        ctx.fill();
-        ctx.stroke();
-        
-        // 脚
-        fillCircle(140, 430, 28, '#cb3263', '#321320', 3);
-        fillCircle(260, 430, 28, '#cb3263', '#321320', 3);
-        fillCircle(145, 432, 10, '#f3d2ad');
-        fillCircle(255, 432, 10, '#f3d2ad');
-        
-        // 玫瑰装饰
-        ctx.beginPath();
-        ctx.arc(50, 40, 18, 0, Math.PI*2);
-        ctx.fillStyle = '#ef5f7a';
-        ctx.fill();
-        ctx.fillStyle = '#fda7b5';
-        for(let i=0; i<6; i++) {
-            let angle = i * Math.PI*2/6;
-            let x = 50 + Math.cos(angle)*22;
-            let y = 40 + Math.sin(angle)*20;
-            ctx.beginPath();
-            ctx.ellipse(x, y, 10, 8, angle, 0, Math.PI*2);
-            ctx.fill();
+        function mling_draw_eyeball(zb1, zb2, zb3, zb4) {
+            const points = [zb1, zb2, zb3, zb4];
+            const colors = ['#ffffff', '#482d08', '#000000', '#ffffff'];
+            for (let i = 0; i < points.length; i++) {
+                penup();
+                goto(points[i][0], points[i][1]);
+                pendown();
+                begin_fill();
+                seth(0);
+                color(colors[i]);
+                pencolor('#000000');
+                pensize(2);
+                const radius = mling_circle_list[circleIndex % mling_circle_list.length][0];
+                circle(radius, 360);
+                end_fill();
+                circleIndex++;
+            }
         }
-        ctx.fillStyle = '#f9788b';
-        ctx.beginPath();
-        ctx.arc(50, 40, 12, 0, Math.PI*2);
-        ctx.fill();
-        fillCircle(50, 35, 4, '#ffeb99');
         
-        // 草莓装饰
-        ctx.beginPath();
-        ctx.ellipse(610, 560, 22, 28, 0.2, 0, Math.PI*2);
-        ctx.fillStyle = '#ef5f7a';
-        ctx.fill();
-        ctx.fillStyle = '#22ac38';
-        ctx.beginPath();
-        ctx.moveTo(605, 530);
-        ctx.lineTo(615, 525);
-        ctx.lineTo(610, 536);
-        ctx.fill();
+        // ========== 开始绘制主程序 ==========
         
-        // 文字
-        ctx.font = "bold 24px '黑体'";
+        // 原代码中从 penup() 开始到 t.done() 的部分
+        
+        penup();
+        // p = t.home() - 记录位置，我们不需要
+        pencolor("#321320");
+        fillcolor("#cb3263");
+        pensize(4);
+        goto(120, 110);
+        pendown();
+        begin_fill();
+        goto(200, 0);
+        lt(-40);
+        circle(-110, 105);
+        lt(75);
+        goto(170, -110);
+        lt(-80);
+        circle(30, 40);
+        lt(60);
+        circle(-80, 70);
+        lt(83);
+        circle(-35, 95);
+        goto(60, -270);
+        lt(-80);
+        circle(-65, 70);
+        lt(63);
+        circle(35, 30);
+        lt(130);
+        circle(-65, 70);
+        goto(-120, -270);
+        lt(-110);
+        circle(-35, 80);
+        lt(83);
+        circle(-80, 50);
+        lt(60);
+        circle(-80, 60);
+        lt(60);
+        circle(30, 30);
+        lt(20);
+        circle(80, 80);
+        lt(-105);
+        circle(-70, 150);
+        lt(50);
+        circle(-170, 50);
+        goto(120, 110);
+        end_fill();
+        
+        penup();
+        pencolor("#321320");
+        fillcolor("#ffffff");
+        pensize(4);
+        goto(90, 60);
+        pendown();
+        begin_fill();
+        rt(30);
+        circle(-130, 360);
+        end_fill();
+        
+        penup();
+        pencolor("#321320");
+        fillcolor("#015426");
+        pensize(4);
+        goto(-250, -55);
+        dot("blue");
+        seth(0);
+        pendown();
+        begin_fill();
+        rt(-55);
+        circle(-35, 70);
+        goto(-200, -165);
+        goto(-250, -165);
+        goto(-220, -75);
+        goto(-250, -55);
+        end_fill();
+        
+        rose();
+        
+        penup();
+        pencolor("#321320");
+        fillcolor("#f3d2ad");
+        pensize(4);
+        goto(185, -90);
+        pendown();
+        begin_fill();
+        rt(140);
+        circle(43, 95);
+        goto(185, -90);
+        end_fill();
+        
+        penup();
+        seth(0);
+        pencolor('#321320');
+        fillcolor('#cb3263');
+        pensize(4);
+        begin_fill();
+        goto(21, 0);
+        pendown();
+        circle(123, 134);
+        lt(-90);
+        circle(40, 185);
+        lt(-60);
+        circle(120, 60);
+        lt(-90);
+        circle(50, 200);
+        lt(-90);
+        circle(100, 100);
+        lt(-12);
+        circle(100, 40);
+        goto(21, 0);
+        penup();
+        end_fill();
+        
+        penup();
+        goto(0, 0);
+        seth(0);
+        pencolor('#321320');
+        fillcolor('#ffffff');
+        pensize(4);
+        begin_fill();
+        goto(-70, 210);
+        lt(140);
+        pendown();
+        circle(30, 200);
+        goto(-70, 210);
+        penup();
+        end_fill();
+        
+        penup();
+        goto(0, 0);
+        seth(0);
+        pencolor('#321320');
+        fillcolor('#ffffff');
+        pensize(4);
+        begin_fill();
+        goto(90, 220);
+        lt(45);
+        pendown();
+        circle(22, 200);
+        goto(90, 220);
+        penup();
+        end_fill();
+        
+        penup();
+        goto(0, 0);
+        seth(0);
+        pencolor('#321320');
+        fillcolor('#ffffff');
+        pensize(4);
+        begin_fill();
+        lt(-98);
+        lt(90);
+        goto(18, 10);
+        pendown();
+        circle(100, 134);
+        lt(10);
+        circle(110, 30);
+        lt(10);
+        circle(160, 40);
+        circle(85, 40);
+        lt(2);
+        circle(95, 40);
+        lt(5);
+        circle(95, 60);
+        goto(18, 10);
+        penup();
+        end_fill();
+        
+        penup();
+        pencolor("#321320");
+        fillcolor("#8f3a52");
+        pensize(2);
+        goto(25, 240);
+        pendown();
+        begin_fill();
+        goto(60, 235);
+        lt(30);
+        fd(8);
+        lt(90);
+        fd(22);
+        circle(90, 8);
+        lt(20);
+        circle(90, 8);
+        lt(20);
+        circle(90, 20);
+        lt(40);
+        circle(50, 20);
+        end_fill();
+        
+        penup();
+        pensize(12);
+        goto(-2, 250);
+        pencolor("#4D1F00");
+        fillcolor("#4D1F00");
+        pendown();
+        goto(60, 240);
+        end_fill();
+        
+        penup();
+        pencolor("#321320");
+        fillcolor("#8f3a52");
+        pensize(2);
+        goto(-55, 193);
+        pendown();
+        begin_fill();
+        lt(65);
+        circle(-90, 25);
+        goto(-10, 230);
+        lt(30);
+        fd(8);
+        lt(90);
+        fd(18);
+        circle(90, 8);
+        lt(20);
+        circle(90, 10);
+        lt(40);
+        circle(90, 30);
+        lt(30);
+        circle(40, 20);
+        penup();
+        end_fill();
+        
+        pensize(12);
+        goto(-63, 195);
+        pencolor("#4D1F00");
+        fillcolor("#4D1F00");
+        pendown();
+        lt(100);
+        circle(-85, 45);
+        end_fill();
+        
+        mling_draw_eyeball([-20, 180], [-23, 185], [-25, 188], [-30, 200]);
+        mling_draw_eyeball([30, 193], [27, 200], [25, 203], [20, 213]);
+        
+        penup();
+        pencolor("#321320");
+        fillcolor("#8f3a52");
+        pensize(3);
+        goto(25, 105);
+        pendown();
+        begin_fill();
+        circle(85, 65);
+        lt(16);
+        circle(30, 55);
+        lt(20);
+        circle(145, 58);
+        lt(8);
+        circle(20, 55);
+        lt(8);
+        circle(50, 65);
+        lt(-5);
+        circle(310, 8);
+        end_fill();
+        
+        penup();
+        goto(0, 0);
+        seth(0);
+        pencolor('#321320');
+        fillcolor('#a93e54');
+        pensize(3);
+        begin_fill();
+        lt(-20);
+        goto(9, 66);
+        pendown();
+        circle(68, 40);
+        lt(10);
+        circle(65, 40);
+        lt(160);
+        circle(-75, 85);
+        lt(158);
+        circle(48, 37);
+        goto(9, 66);
+        penup();
+        end_fill();
+        
+        // 文字部分
+        ctx.font = "20px '黑体'";
         ctx.fillStyle = "#987824";
-        ctx.fillText("🍓", 540, 640);
-        ctx.font = "18px '黑体'";
-        ctx.fillStyle = "#8b5a2b";
-        ctx.fillText("愿你", 600, 660);
-        ctx.fillText("没烦恼", 590, 690);
-        ctx.font = "14px '黑体'";
-        ctx.fillStyle = "#ab7e4c";
-        ctx.fillText("逆境清醒", 620, 50);
-        ctx.font = "italic 12px '黑体'";
-        ctx.fillStyle = "#b8826b";
-        ctx.fillText("Strawberry Bear", 30, 680);
+        ctx.fillText("愿\n你\n没\n有\n烦\n恼\n", 260, 60);
+        ctx.font = "10px '黑体'";
+        ctx.fillStyle = "#987824";
+        ctx.fillText("逆\n境\n清\n醒\n", 290, 183);
         
-        // 小爱心装饰
-        for(let i=0;i<8;i++) {
-            let x = 350 + i*35;
-            let y = 510 + Math.sin(i)*12;
-            ctx.fillStyle = `rgba(255, 80, 120, ${0.3+Math.random()*0.3})`;
-            ctx.beginPath();
-            ctx.moveTo(x, y-5);
-            ctx.bezierCurveTo(x+3, y-8, x+6, y-2, x, y+3);
-            ctx.bezierCurveTo(x-6, y-2, x-3, y-8, x, y-5);
-            ctx.fill();
-        }
+        // hideturtle - 不需要
+        // t.done() - 完成
+        
+        console.log("草莓熊绘制完成（逐行翻译自 Python turtle 原版）");
     })();
 </script>
 </body>
