@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>草莓熊 - 逆境清醒</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #f5f0eb;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: "黑体", "Microsoft YaHei", sans-serif;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            padding: 20px;
+            display: inline-block;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border-radius: 12px;
+        }
+        .title {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #cb3263;
+        }
+        .note {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <div class="container">
+        <canvas id="bearCanvas" width="700" height="700" style="width:700px;height:700px;"></canvas>
+        <div class="title">🍓 逆境清醒草莓熊 🧸</div>
+        <div class="note">愿你每天都没有烦恼</div>
+    </div>
+</div>
+
+<script>
+    (function(){
+        const canvas = document.getElementById('bearCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = 700;
+        canvas.height = 700;
+
+        ctx.clearRect(0, 0, 700, 700);
+        
+        function fillCircle(x, y, r, fillColor, strokeColor = '#321320', lineWidth = 2) {
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI*2);
+            ctx.fillStyle = fillColor;
+            ctx.fill();
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = lineWidth;
+            ctx.stroke();
+        }
+        
+        // 身体
+        ctx.beginPath();
+        ctx.moveTo(120, 110);
+        ctx.lineTo(200, 0);
+        ctx.lineTo(240, -40);
+        ctx.quadraticCurveTo(280, -70, 300, -20);
+        ctx.lineTo(380, 80);
+        ctx.quadraticCurveTo(420, 130, 400, 200);
+        ctx.lineTo(360, 280);
+        ctx.quadraticCurveTo(320, 350, 260, 370);
+        ctx.lineTo(180, 380);
+        ctx.quadraticCurveTo(100, 370, 60, 310);
+        ctx.lineTo(20, 240);
+        ctx.quadraticCurveTo(-10, 180, 20, 130);
+        ctx.lineTo(80, 100);
+        ctx.lineTo(120, 110);
+        ctx.fillStyle = '#cb3263';
+        ctx.fill();
+        ctx.strokeStyle = '#321320';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        
+        // 白色面部
+        ctx.beginPath();
+        ctx.ellipse(200, 180, 130, 120, 0, 0, Math.PI*2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.strokeStyle = '#321320';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        
+        // 左耳
+        ctx.beginPath();
+        ctx.ellipse(70, 100, 45, 50, -0.3, 0, Math.PI*2);
+        ctx.fillStyle = '#cb3263';
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.ellipse(70, 100, 28, 32, -0.3, 0, Math.PI*2);
+        ctx.fillStyle = '#f3d2ad';
+        ctx.fill();
+        ctx.stroke();
+        
+        // 右耳
+        ctx.beginPath();
+        ctx.ellipse(330, 100, 45, 50, 0.3, 0, Math.PI*2);
+        ctx.fillStyle = '#cb3263';
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.ellipse(330, 100, 28, 32, 0.3, 0, Math.PI*2);
+        ctx.fillStyle = '#f3d2ad';
+        ctx.fill();
+        ctx.stroke();
+        
+        // 眼睛
+        fillCircle(145, 160, 22, '#ffffff', '#321320', 3);
+        fillCircle(255, 160, 22, '#ffffff', '#321320', 3);
+        fillCircle(150, 162, 12, '#482d08', '#321320', 2);
+        fillCircle(250, 162, 12, '#482d08', '#321320', 2);
+        fillCircle(152, 162, 7, '#000000');
+        fillCircle(248, 162, 7, '#000000');
+        fillCircle(157, 157, 3, '#ffffff');
+        fillCircle(243, 157, 3, '#ffffff');
+        
+        // 鼻子
+        ctx.beginPath();
+        ctx.moveTo(195, 210);
+        ctx.lineTo(205, 230);
+        ctx.lineTo(185, 230);
+        ctx.closePath();
+        ctx.fillStyle = '#f04969';
+        ctx.fill();
+        ctx.strokeStyle = '#321320';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        fillCircle(195, 215, 4, '#ffffff');
+        
+        // 嘴巴
+        ctx.beginPath();
+        ctx.arc(200, 245, 28, 0.05, Math.PI - 0.05);
+        ctx.strokeStyle = '#321320';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(200, 258, 12, 0, Math.PI);
+        ctx.stroke();
+        
+        // 眉毛
+        ctx.beginPath();
+        ctx.moveTo(125, 135);
+        ctx.lineTo(155, 140);
+        ctx.lineWidth = 6;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(245, 140);
+        ctx.lineTo(275, 135);
+        ctx.stroke();
+        
+        // 腮红
+        fillCircle(115, 210, 12, '#f8c0c8', 'transparent', 0);
+        fillCircle(285, 210, 12, '#f8c0c8', 'transparent', 0);
+        
+        // 绿叶
+        ctx.beginPath();
+        ctx.moveTo(200, 65);
+        ctx.lineTo(185, 80);
+        ctx.lineTo(200, 92);
+        ctx.lineTo(215, 80);
+        ctx.fillStyle = '#035025';
+        ctx.fill();
+        ctx.fillStyle = '#22ac38';
+        ctx.beginPath();
+        ctx.ellipse(200, 68, 12, 8, 0, 0, Math.PI*2);
+        ctx.fill();
+        
+        // 围兜
+        ctx.beginPath();
+        ctx.ellipse(200, 320, 70, 40, 0, 0, Math.PI*2);
+        ctx.fillStyle = '#fef7e6';
+        ctx.fill();
+        ctx.strokeStyle = '#cb9e7c';
+        ctx.stroke();
+        
+        // 手臂
+        ctx.beginPath();
+        ctx.moveTo(85, 210);
+        ctx.quadraticCurveTo(45, 240, 50, 290);
+        ctx.lineTo(70, 285);
+        ctx.quadraticCurveTo(72, 250, 100, 245);
+        ctx.fillStyle = '#cb3263';
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(315, 210);
+        ctx.quadraticCurveTo(355, 240, 350, 290);
+        ctx.lineTo(330, 285);
+        ctx.quadraticCurveTo(328, 245, 300, 245);
+        ctx.fill();
+        ctx.stroke();
+        
+        // 脚
+        fillCircle(140, 430, 28, '#cb3263', '#321320', 3);
+        fillCircle(260, 430, 28, '#cb3263', '#321320', 3);
+        fillCircle(145, 432, 10, '#f3d2ad');
+        fillCircle(255, 432, 10, '#f3d2ad');
+        
+        // 玫瑰装饰
+        ctx.beginPath();
+        ctx.arc(50, 40, 18, 0, Math.PI*2);
+        ctx.fillStyle = '#ef5f7a';
+        ctx.fill();
+        ctx.fillStyle = '#fda7b5';
+        for(let i=0; i<6; i++) {
+            let angle = i * Math.PI*2/6;
+            let x = 50 + Math.cos(angle)*22;
+            let y = 40 + Math.sin(angle)*20;
+            ctx.beginPath();
+            ctx.ellipse(x, y, 10, 8, angle, 0, Math.PI*2);
+            ctx.fill();
+        }
+        ctx.fillStyle = '#f9788b';
+        ctx.beginPath();
+        ctx.arc(50, 40, 12, 0, Math.PI*2);
+        ctx.fill();
+        fillCircle(50, 35, 4, '#ffeb99');
+        
+        // 草莓装饰
+        ctx.beginPath();
+        ctx.ellipse(610, 560, 22, 28, 0.2, 0, Math.PI*2);
+        ctx.fillStyle = '#ef5f7a';
+        ctx.fill();
+        ctx.fillStyle = '#22ac38';
+        ctx.beginPath();
+        ctx.moveTo(605, 530);
+        ctx.lineTo(615, 525);
+        ctx.lineTo(610, 536);
+        ctx.fill();
+        
+        // 文字
+        ctx.font = "bold 24px '黑体'";
+        ctx.fillStyle = "#987824";
+        ctx.fillText("🍓", 540, 640);
+        ctx.font = "18px '黑体'";
+        ctx.fillStyle = "#8b5a2b";
+        ctx.fillText("愿你", 600, 660);
+        ctx.fillText("没烦恼", 590, 690);
+        ctx.font = "14px '黑体'";
+        ctx.fillStyle = "#ab7e4c";
+        ctx.fillText("逆境清醒", 620, 50);
+        ctx.font = "italic 12px '黑体'";
+        ctx.fillStyle = "#b8826b";
+        ctx.fillText("Strawberry Bear", 30, 680);
+        
+        // 小爱心装饰
+        for(let i=0;i<8;i++) {
+            let x = 350 + i*35;
+            let y = 510 + Math.sin(i)*12;
+            ctx.fillStyle = `rgba(255, 80, 120, ${0.3+Math.random()*0.3})`;
+            ctx.beginPath();
+            ctx.moveTo(x, y-5);
+            ctx.bezierCurveTo(x+3, y-8, x+6, y-2, x, y+3);
+            ctx.bezierCurveTo(x-6, y-2, x-3, y-8, x, y-5);
+            ctx.fill();
+        }
+    })();
+</script>
+</body>
+</html>
